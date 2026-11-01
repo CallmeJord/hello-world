@@ -107,11 +107,17 @@ export class Renderer {
     return [u.px + (u.x - u.px) * a, u.py + (u.y - u.py) * a];
   }
 
+  // Flying units are drawn this far above their ground position.
+  lift(u) {
+    return u.t.flying ? 16 : 0;
+  }
+
   unitAt(wx, wy, slop = 10) {
     let best = null, bd = Infinity;
     for (const u of this.game.units) {
       if (u.dead) continue;
-      const [x, y] = this.pos(u);
+      const [x, y0] = this.pos(u);
+      const y = y0 - this.lift(u);
       const r = u.radius + slop / Math.min(1.5, this.cam.zoom);
       const d = (x - wx) * (x - wx) + (y - wy) * (y - wy);
       if (d < r * r && d < bd) {
@@ -287,7 +293,8 @@ export class Renderer {
       if (x < vx0 - 60 || x > vx1 + 60 || y < vy0 - 60 || y > vy1 + 60) continue;
       vis.push([u, x, y]);
     }
-    vis.sort((a, b) => a[2] - (a[0].building ? 20 : 0) - (b[2] - (b[0].building ? 20 : 0)));
+    const depth = (e) => e[2] - (e[0].building ? 20 : 0) + (e[0].t.flying ? 100000 : 0);
+    vis.sort((a, b) => depth(a) - depth(b));
 
     // selection rings
     for (const [u, x, y] of vis) {
@@ -315,7 +322,8 @@ export class Renderer {
     for (const [u, x, y] of vis) {
       if (u.building) continue;
       ctx.beginPath();
-      ctx.ellipse(x + 2, y + u.radius * 0.55, u.radius * 0.95, u.radius * 0.5, 0, 0, TAU);
+      if (u.t.flying) ctx.ellipse(x + 6, y + 6, u.radius * 0.8, u.radius * 0.4, 0, 0, TAU);
+      else ctx.ellipse(x + 2, y + u.radius * 0.55, u.radius * 0.95, u.radius * 0.5, 0, 0, TAU);
       ctx.fill();
     }
 
@@ -388,7 +396,8 @@ export class Renderer {
     // walk bob
     const moving = u.vx !== 0 || u.vy !== 0;
     const bob = moving ? Math.sin(now * 14 + u.id) * 1.2 : 0;
-    ctx.translate(x + ox, y + oy + bob);
+    const lift = this.lift(u);
+    ctx.translate(x + ox, y + oy + (lift ? -lift + Math.sin(now * 3 + u.id) * 2 : bob));
     const alpha = u.expires ? 0.75 + 0.25 * Math.sin(now * 4) : 1;
     drawModel(ctx, u.t.model, u.radius, P.color, u.t.color, face, now + u.id * 0.37, { alpha, tier: u.t.tier });
     // buff indicators
@@ -431,7 +440,7 @@ export class Renderer {
       if (!hero && !u.building && !damaged && !this.selection.has(u.id)) continue;
       if (!showAll && !hero && !u.building) continue;
       const w = Math.max(18, u.radius * 2.2), h = hero ? 4 : 3;
-      const bx = x - w / 2, by = y - u.radius - (hero ? 12 : 8);
+      const bx = x - w / 2, by = y - this.lift(u) - u.radius - (hero ? 12 : 8);
       const f = Math.max(0, u.hp / u.s.maxHp);
       ctx.fillStyle = 'rgba(0,0,0,0.65)';
       ctx.fillRect(bx - 1, by - 1, w + 2, h + 2 + (hero && u.s.maxMana ? 3 : 0));

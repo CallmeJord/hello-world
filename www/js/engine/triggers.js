@@ -136,8 +136,12 @@ export class TriggerSystem {
         break;
       }
       case 'gold': {
-        const amt = Math.round(Number(this.ev(a.amount, ctx)) || 0);
-        for (const p of this.players(a.to ?? 'players', ctx)) g.players[p].gold = Math.max(0, g.players[p].gold + amt);
+        // Amount is evaluated per recipient with $player bound to them.
+        for (const p of this.players(a.to ?? 'players', ctx)) {
+          const amt = Math.round(Number(this.ev(a.amount, { ...ctx, player: p })) || 0);
+          g.players[p].gold = Math.max(0, g.players[p].gold + amt);
+          if (amt > 0 && a.show) g.fx.push({ k: 'msg', text: this.text(a.show, { ...ctx, player: p, amount: amt }).replace('{amount}', amt), p: [p], dur: 3, color: '#ffd54a' });
+        }
         break;
       }
       case 'if':

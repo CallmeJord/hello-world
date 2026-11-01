@@ -10,7 +10,7 @@ const srcDir = join(here, 'maps');
 const outDir = join(here, '..', 'www', 'maps');
 mkdirSync(outDir, { recursive: true });
 
-const order = ['glacier-gate', 'ember-rift', 'last-light'];
+const order = ['glacier-gate', 'rimecrest-run', 'ember-rift', 'last-light'];
 const index = [];
 let failed = false;
 const files = readdirSync(srcDir).filter((f) => f.endsWith('.mjs'));

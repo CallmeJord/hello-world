@@ -140,7 +140,7 @@ export class Game {
       u.y = (ty + sz / 2) * TILE;
       this.grid.setBlock(tx, ty, sz, 1);
     } else {
-      const p = this.grid.nearestWalkable(clamp(x, 4, this.W - 4), clamp(y, 4, this.H - 4), u.radius);
+      const p = t.flying ? [clamp(x, 4, this.W - 4), clamp(y, 4, this.H - 4)] : this.grid.nearestWalkable(clamp(x, 4, this.W - 4), clamp(y, 4, this.H - 4), u.radius);
       u.x = p[0];
       u.y = p[1];
     }
@@ -233,6 +233,14 @@ export class Game {
     this._refreshStats(u);
   }
 
+  // Air/ground targeting: towers may be ground-only or air-only; melee units
+  // can't reach flyers.
+  canHit(u, e) {
+    const t = u.t && u.t.targets ? u.t.targets : u.t && u.t.range > 40 ? 'both' : 'ground';
+    if (e.t.flying) return t !== 'ground';
+    return t !== 'air';
+  }
+
   canAttack(u) {
     return !!(u.t.damage && !u.t.passive);
   }
@@ -272,7 +280,7 @@ export class Game {
   acquire(u, range) {
     let best = null, bs = Infinity;
     this.query(u.x, u.y, range + u.radius + 40, (e) => {
-      if (e === u || !this.isTargetable(e) || !this.areEnemies(u.owner, e.owner)) return;
+      if (e === u || !this.isTargetable(e) || !this.areEnemies(u.owner, e.owner) || !this.canHit(u, e)) return;
       // Computer lane/wave units ignore neutral camp guards unless provoked.
       if (e.guard && !u.guard && e.order.type !== 'attack' && this.players[u.owner].ctrl !== 'human') return;
       const d = this.gap(u, e);
@@ -400,6 +408,11 @@ export class Game {
       return;
     }
     const P = this.players[u.owner];
+    if (u.t.income && (this.tick - u.born) % Math.max(1, sec(u.t.income.every || 10)) === 0 && this.tick > u.born) {
+      const amt = u.t.income.amount || 0;
+      P.gold += amt;
+      this.fx.push({ k: 'text', x: u.x, y: u.y - 20, text: '+' + amt, color: '#ffd54a', p: [u.owner], gold: true });
+    }
     if (u.abilities.length && (P.ctrl === 'computer' || P.ctrl === 'bot') && (this.tick + u.id) % 10 === 0) {
       if (this._autocast(u)) return;
     }
@@ -435,7 +448,7 @@ export class Game {
         u.vx = u.vy = 0;
         if (!this.canAttack(u)) break;
         let tgt = u.target ? this.unitById.get(u.target) : null;
-        if (!tgt || !this.isTargetable(tgt) || this.gap(u, tgt) > s.range) {
+        if (!tgt || !this.isTargetable(tgt) || this.gap(u, tgt) > s.range || !this.canHit(u, tgt)) {
           tgt = this.acquire(u, s.range);
           u.target = tgt ? tgt.id : 0;
         }
@@ -568,6 +581,17 @@ export class Game {
       u.vx = u.vy = 0;
       return true;
     }
+    if (u.t.flying) {
+      const d = Math.sqrt(d2), step = u.s.speed * DT;
+      const k = Math.min(step, d) / d;
+      u.vx = dx * k;
+      u.vy = dy * k;
+      u.x = clamp(u.x + u.vx, u.radius, this.W - u.radius);
+      u.y = clamp(u.y + u.vy, u.radius, this.H - u.radius);
+      u.fdx = dx;
+      u.fdy = dy;
+      return d <= step;
+    }
     const need = !u.path || u.pver !== this.grid.version || Math.abs(u.pgx - gx) > 24 || Math.abs(u.pgy - gy) > 24 || u.stuck > 12;
     if (need) {
       if (u.stuck > 12 && d2 < (arrive + 48) * (arrive + 48)) {
@@ -666,7 +690,7 @@ export class Game {
               const other = cells[ny * cw + nx];
               for (let j = 0; j < other.length; j++) {
                 const b = other[j];
-                if (b.id <= a.id || b.dead || b.building) continue;
+                if (b.id <= a.id || b.dead || b.building || !a.t.flying !== !b.t.flying) continue;
                 let dx = b.x - a.x, dy = b.y - a.y;
                 const rr = a.radius + b.radius;
                 let d2 = dx * dx + dy * dy;
@@ -695,6 +719,11 @@ export class Game {
   _nudge(u, dx, dy) {
     const g = this.grid, r = u.radius;
     const nx = clamp(u.x + dx, r, this.W - r), ny = clamp(u.y + dy, r, this.H - r);
+    if (u.t.flying) {
+      u.x = nx;
+      u.y = ny;
+      return;
+    }
     if (g.fits(nx, ny, r)) {
       u.x = nx;
       u.y = ny;
@@ -773,7 +802,7 @@ export class Game {
       this.fx.push({ k: 'ring', x, y, r: h.splash, color: h.color || '#ffcf7a', dur: 0.3 });
       const victims = [];
       this.enemiesNear(x, y, h.splash, src.owner, (e) => {
-        if (e !== t && !e.building) victims.push(e);
+        if (e !== t && !e.building && (!src.t || !src.t.id || this.canHit(src, e))) victims.push(e);
       });
       for (const e of victims) hitOne(e, h.dmg * 0.75);
     }
@@ -789,7 +818,7 @@ export class Game {
       d *= falloff;
       let best = null, bd = Infinity;
       this.enemiesNear(last.x, last.y, range, src.owner, (e) => {
-        if (hit.has(e.id) || e.building) return;
+        if (hit.has(e.id) || e.building || (src.t && src.t.id && !spell && !this.canHit(src, e))) return;
         const dx = e.x - last.x, dy = e.y - last.y, dd = dx * dx + dy * dy;
         if (dd < bd) {
           bd = dd;
@@ -958,21 +987,21 @@ export class Game {
       }
       case 'heal':
         if (tgt && !tgt.dead) {
-          const amt = lv(e.amount, L);
+          const amt = Math.round(lv(e.amount || 0, L) + lv(e.pct || 0, L) * tgt.s.maxHp);
           tgt.hp = Math.min(tgt.s.maxHp, tgt.hp + amt);
           this.fx.push({ k: 'text', x: tgt.x, y: tgt.y - 16, text: '+' + amt, color: '#7dff8a' });
           this.fx.push({ k: 'ring', x: tgt.x, y: tgt.y, r: 24, color: '#7dff8a', dur: 0.5 });
         }
         break;
       case 'areaHeal': {
-        const amt = lv(e.amount, L);
+        const pct = lv(e.pct || 0, L), flat = lv(e.amount || 0, L);
         this.fx.push({ k: 'ring', x: u.x, y: u.y, r: aoe, color: '#fff3a6', dur: 0.8, fill: true });
         const list = [];
         this.alliesNear(u.x, u.y, aoe, u.owner, (a) => {
           if (!a.building) list.push(a);
         });
         for (const a of list) {
-          a.hp = Math.min(a.s.maxHp, a.hp + amt);
+          a.hp = Math.min(a.s.maxHp, a.hp + flat + pct * a.s.maxHp);
           if (e.buff) this.addBuff(a, this._mkBuff(def.id, e.buff, L));
         }
         break;
@@ -1149,6 +1178,7 @@ export class Game {
     const P = this.players[p], t = this.content.units[type];
     if (!P || !t || !t.building || !this.buildList(P).includes(type)) return { ok: false, reason: 'You cannot build that.' };
     if ((t.cost || 0) > P.gold) return { ok: false, reason: 'Not enough gold.' };
+    if (t.limit && this.units.filter((u) => !u.dead && u.owner === p && u.type === type).length >= t.limit) return { ok: false, reason: `Limit reached (${t.limit}).` };
     const s = t.building.size || 1, g = this.grid;
     for (let y = ty; y < ty + s; y++) for (let x = tx; x < tx + s; x++) if (!g.buildableTile(x, y)) return { ok: false, reason: 'Cannot build there.' };
     const zones = this.rules.buildZones && (this.rules.buildZones[P.key] || this.rules.buildZones.all);
@@ -1161,7 +1191,7 @@ export class Game {
     }
     const x0 = tx * TILE, y0 = ty * TILE, x1 = (tx + s) * TILE, y1 = (ty + s) * TILE;
     for (const u of this.units) {
-      if (u.dead || u.building) continue;
+      if (u.dead || u.building || u.t.flying) continue;
       const cx = clamp(u.x, x0, x1), cy = clamp(u.y, y0, y1);
       const dx = u.x - cx, dy = u.y - cy;
       if (dx * dx + dy * dy < u.radius * u.radius) return { ok: false, reason: 'Something is in the way.' };
@@ -1169,14 +1199,16 @@ export class Game {
     const checks = this.rules.pathChecks;
     if (checks && checks.length) {
       const blocked = (x, y) => x >= tx && x < tx + s && y >= ty && y < ty + s;
+      const floods = new Map();
       for (const [from, to] of checks) {
         const rf = this.regions[from], rt = this.regions[to];
         if (!rf || !rt) continue;
-        const seen = g.flood(regionTiles(rt), blocked);
+        if (!floods.has(to)) floods.set(to, g.flood(regionTiles(rt), blocked));
+        const seen = floods.get(to);
         const reach = regionTiles(rf).some(([x, y]) => seen[y * g.w + x]);
         if (!reach) return { ok: false, reason: 'That would block the path!' };
         for (const u of this.units) {
-          if (u.dead || u.building || !this.areEnemies(p, u.owner)) continue;
+          if (u.dead || u.building || u.t.flying || !this.areEnemies(p, u.owner)) continue;
           const ux = Math.floor(u.x / TILE), uy = Math.floor(u.y / TILE);
           if (g.inBounds(ux, uy) && !seen[uy * g.w + ux] && !blocked(ux, uy) && g.walkableTile(ux, uy)) return { ok: false, reason: 'That would trap an enemy!' };
         }
@@ -1225,7 +1257,7 @@ export class Game {
       case 'attack': {
         const tgt = this.unitById.get(c.target);
         if (!tgt || !this.isTargetable(tgt)) break;
-        const us = this.ownUnits(p, c.u).filter((u) => this.canAttack(u));
+        const us = this.ownUnits(p, c.u).filter((u) => this.canAttack(u) && this.canHit(u, tgt));
         for (const u of us) {
           if (u === tgt) continue;
           if (u.building || !u.t.speed) {

@@ -9,7 +9,7 @@ Everything here is original: the engine, units, heroes, abilities, items, maps a
 | **Platforms** | Android app (Capacitor), installable PWA, any modern browser |
 | **Multiplayer** | Deterministic lockstep over WebSockets, with a lobby, slots, chat and desync detection |
 | **Custom maps** | Plain JSON with terrain, regions, units, rules and **triggers** (event → conditions → actions). They are shared automatically when you host. |
-| **Bundled maps** | *Glacier Gate* (maze TD, 1–4p co-op) · *Ember Rift* (3-lane hero arena, up to 3v3) · *Last Light* (hero survival, 1–4p co-op) |
+| **Bundled maps** | *Rimecrest Run* (6-lane co-op maze TD) · *Glacier Gate* (maze TD, 1–4p co-op) · *Ember Rift* (3-lane hero arena, up to 3v3) · *Last Light* (hero survival, 1–4p co-op) |
 
 ## Quick start
 

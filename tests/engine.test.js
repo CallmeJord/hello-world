@@ -182,3 +182,56 @@ test('triggers: expressions, timers and messages', () => {
   assert.ok(msgs.includes('n is 36'));
   assert.deepEqual(g.ended.winners, ['a']);
 });
+
+test('rimecrest run: lanes, flying units, air/ground towers, income, limits, interest', () => {
+  const map = loadMap('rimecrest-run');
+  const slots = map.players.map((p, i) => (p.type === 'computer' ? null : i < 2 ? { ctrl: 'human' } : { ctrl: 'empty' }));
+  const g = new Game(map, { seed: 9, slots });
+  assert.equal(g.vars.lives, 40, 'lives scale with players (20 + 10 each)');
+  const [P1, P2] = g.players;
+  // Build zones: own plot + shared keep only
+  assert.ok(g.canBuild(0, 'rc_arrow1', 4, 8).ok);
+  assert.equal(g.canBuild(0, 'rc_arrow1', 17, 8).ok, false, "can't build in someone else's plot");
+  assert.ok(g.canBuild(1, 'rc_arrow1', 30, 36).ok, 'anyone can build in the keep');
+  // Drill limit + income
+  P1.gold = 10000;
+  for (const [tx, ty] of [[2, 24], [5, 24], [9, 24]]) g.applyCommand(0, { t: 'build', type: 'rc_drill', tx, ty });
+  assert.match(g.canBuild(0, 'rc_drill', 2, 20).reason, /Limit/);
+  const before = P1.gold;
+  for (let i = 0; i < 20 * 10 + 1; i++) g.step();
+  assert.equal(P1.gold, before + 3 * 6, 'three drills pay 6 gold each every 10s');
+  // Air/ground targeting
+  const neutral = g.playerByKey.rimeborn.index;
+  const cannon = g.createUnit('rc_cannon1', 0, 6 * 32, 12 * 32);
+  const sky = g.createUnit('rc_sky1', 0, 10 * 32, 12 * 32);
+  const flyer = g.createUnit('rc_rimewing', neutral, 8 * 32, 15 * 32);
+  const walker = g.createUnit('rc_scuttler', neutral, 8 * 32, 15 * 32);
+  assert.equal(g.canHit(cannon, flyer), false);
+  assert.equal(g.canHit(cannon, walker), true);
+  assert.equal(g.canHit(sky, flyer), true);
+  assert.equal(g.canHit(sky, walker), false);
+  // Flyers ignore terrain: straight over the rock wall between plots
+  const wing = g.createUnit('rc_rimewing', neutral, 5 * 32, 5 * 32);
+  g.orderPath(wing, 'move', [[20 * 32, 5 * 32]]);
+  for (let i = 0; i < 20 * 6; i++) g.step();
+  assert.ok(wing.x > 13 * 32, 'flyer crossed the wall');
+  // Flyers never block building placement
+  assert.ok(g.canBuild(1, 'rc_arrow1', Math.floor(wing.x / 32) - 1, Math.floor(wing.y / 32) - 1).reason !== 'Something is in the way.');
+  // Interest is computed per player from their own gold
+  P1.gold = 500;
+  P2.gold = 0;
+  g.triggers.fire('timerExpires', { timer: 'next' });
+  assert.equal(g.vars.wave, 1);
+  const bonus = 30 + 5;
+  assert.equal(P2.gold, bonus + Math.floor(bonus * 0.04), "interest is paid on gold after the wave bonus");
+  assert.equal(P1.gold, 500 + bonus + Math.min(Math.floor((500 + bonus) * 0.04), 24));
+  // Only occupied lanes spawn
+  let spawned = 0;
+  for (let i = 0; i < 20 * 12; i++) {
+    g.step();
+    spawned = g.units.filter((u) => u.owner === neutral && u.type === 'rc_scuttler' && !u.dead).length;
+  }
+  const lanesUsed = new Set(g.units.filter((u) => u.owner === neutral && u.type === 'rc_scuttler' && u.y < 28 * 32).map((u) => Math.floor((u.x / 32 - 2) / 13)));
+  assert.ok(spawned >= 10, 'wave 1 spawned');
+  for (const lane of lanesUsed) assert.ok(lane <= 1, `lane ${lane + 1} is empty and must not spawn`);
+});

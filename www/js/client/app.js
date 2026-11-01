@@ -326,6 +326,7 @@ const SCREENS = {
       </ul>
       <h3>Desktop</h3><p>Left-drag to box select, right-click to move/attack, wheel to zoom, arrow keys to scroll. <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>R</kbd> abilities, <kbd>A</kbd> attack-move, <kbd>S</kbd> stop, <kbd>H</kbd> hold, <kbd>B</kbd> build/shop, <kbd>F1</kbd> hero, <kbd>Space</kbd> center, <kbd>Esc</kbd> cancel/menu.</p>
       <h3>Game modes</h3>
+      <p><b>Rimecrest Run</b> — 6-lane co-op maze TD. Maze your own snowfield; every lane merges into the shared Keep, where anyone can build. Watch for flying waves (build 🦅 Skyspears), healers, splitters and a boss every 10 waves. Banked gold earns interest, and Drills pay income.</p>
       <p><b>Glacier Gate</b> — maze tower defense. Towers can be placed anywhere on the field; shape the path so invaders walk past your towers longer. Upgrade and sell towers by selecting them.</p>
       <p><b>Ember Rift</b> — three-lane hero arena. Minions push lanes on their own; kill them and enemy heroes for gold and XP, take down towers and the enemy Rift Core.</p>
       <p><b>Last Light</b> — co-op survival. Hold the beacon against 15 waves. Heal on the hearth.</p>

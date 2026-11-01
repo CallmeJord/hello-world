@@ -219,6 +219,10 @@ export class Hud {
     if (u.t.damage && !u.t.passive) parts.push(`🎯 ${u.s.range > 40 ? Math.round(u.s.range) : 'melee'}`);
     if (u.t.splash) parts.push('💥 splash');
     if (u.t.onHit && u.t.onHit.slow) parts.push('❄️ slows');
+    if (u.t.targets === 'air') parts.push('🦅 air only');
+    else if (u.t.targets === 'ground') parts.push('⛰️ ground only');
+    if (u.t.flying) parts.push('🪽 flying');
+    if (u.t.income) parts.push(`🪙 +${u.t.income.amount}/${u.t.income.every}s`);
     if (u.t.chain) parts.push('⚡ chains');
     return parts.join(' &nbsp;');
   }
@@ -343,7 +347,7 @@ export class Hud {
         for (const to of u.t.upgradesTo || []) {
           const nt = g.content.units[to];
           if (!nt) continue;
-          cmds.push({ id: 'up_' + to, icon: '⬆️', label: 'Upgrade', cost: nt.cost, disabled: (nt.cost || 0) > P.gold, tip: `${nt.name}: ${nt.blurb || ''}`, fn: () => this.s.issue({ t: 'upgrade', u: u.id, to }) });
+          cmds.push({ id: 'up_' + to, icon: '⬆️', label: nt.short || 'Upgrade', cost: nt.cost, disabled: (nt.cost || 0) > P.gold, tip: `${nt.name}: ${nt.blurb || ''}`, fn: () => this.s.issue({ t: 'upgrade', u: u.id, to }) });
         }
         if (u.invested) {
           const refund = Math.floor(u.invested * (g.rules.sellRatio ?? 0.75));

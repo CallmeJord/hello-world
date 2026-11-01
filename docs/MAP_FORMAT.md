@@ -122,7 +122,11 @@ A map is one JSON document. It describes terrain, regions, players, pre-placed u
 
 Other fields:
 - `building: { "size": 1..4 }`: occupies tiles and never moves.
-- `cost`, `upgradesTo: [types]`, `tier`: for buildable towers.
+- `cost`, `upgradesTo: [types]`, `tier`: for buildable towers. Several `upgradesTo` entries make a branching upgrade; `short` sets the button label (e.g. `"Longshot"`).
+- `limit`: maximum number of this building per player.
+- `income: { "amount": 6, "every": 10 }`: pays its owner gold periodically.
+- `flying: true`: ignores terrain, walls and mazes, flies straight between waypoints, and never blocks building placement.
+- `targets: "ground" | "air" | "both"`: what this unit can attack. Default: `both` for ranged units, `ground` for melee.
 - `hero: { hpPerLevel, manaPerLevel, dmgPerLevel, armorPerLevel }`
 - `shop: [itemIds]`
 - `invulnerable`, `passive` (never attacks), `buildingDmgMult`, `blurb`
@@ -149,8 +153,8 @@ Models (procedural art): `hero_knight hero_mage hero_archer hero_rogue hero_prie
 |---|---|
 | `projectile` | `damage, stun, slow{mult,duration}, speed, color, size` |
 | `area` | `damage, stun, slow, delay, color`. Centred on the target point, or on the caster when `target` is `"none"`. |
-| `heal` | `amount` |
-| `areaHeal` | `amount, buff` |
+| `heal` | `amount`, `pct` (fraction of the target's max HP) |
+| `areaHeal` | `amount`, `pct`, `buff` |
 | `blink` | teleports up to `range` |
 | `buff` | `who: "self" or "allies"`, `buff: { dmgAdd, armorAdd, speedAdd, speedMult, cdMult, duration, color }` |
 | `summon` | `unit, count, duration` |
@@ -196,7 +200,7 @@ All conditions must be truthy for the actions to run. Add `"once": true` to an e
 | `setVar` / `addVar` | `var`, `value` |
 | `spawn` | `type, count, owner, region` or `at` (unit ref), `path: [regions]`, `order: "amove"/"move"`, `interval`, `hpMul`, `bountyMul`, `duration`, `guard` |
 | `message` | `text`, `to`, `duration`, `color` |
-| `gold` | `to`, `amount` |
+| `gold` | `to`, `amount` (evaluated per recipient with `$player` bound to them, e.g. interest), `show`? (message with `{amount}`) |
 | `if` | `cond`, `then`, `else` |
 | `after` | `delay`, `actions` |
 | `repeat` | `count`, `actions` (`$i` is the index) |

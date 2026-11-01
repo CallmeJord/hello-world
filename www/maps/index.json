@@ -12,6 +12,18 @@
     "hash": "c6479fc4"
   },
   {
+    "file": "rimecrest-run.json",
+    "name": "Rimecrest Run",
+    "id": "rimecrest-run",
+    "author": "Riftforge",
+    "genre": "Tower Defense",
+    "description": "Co-op maze TD for 1-6 players. Each player mazes their own lane, then every lane merges into the shared Keep. 30 waves with armored, fast, healing, splitting and flying invaders, plus a boss every 10 waves. Shared lives, interest on banked gold, branching tower upgrades.",
+    "size": "80×50",
+    "slots": 6,
+    "teams": 1,
+    "hash": "4095875a"
+  },
+  {
     "file": "ember-rift.json",
     "name": "Ember Rift",
     "id": "ember-rift",

@@ -227,7 +227,51 @@ export function drawModel(ctx, m, r, team, accent, face, t, opt = {}) {
       for (const [x, y] of [[-r * 0.7, -r * 0.85], [r * 0.4, -r * 0.85], [-r * 0.7, r * 0.85], [r * 0.4, r * 0.85]]) circle(ctx, x, y, r * 0.25, '#3a2a1a');
       break;
 
+    case 'flyer': {
+      const flap = Math.sin(t * 12) * 0.35;
+      for (const side of [-1, 1]) {
+        poly(ctx, [[r * 0.2, side * r * 0.2], [-r * 0.5, side * r * (1.7 + flap)], [-r * 0.9, side * r * (1.2 + flap)], [-r * 0.5, side * r * 0.3]], shade(accent, -0.15), team, 1.2);
+      }
+      poly(ctx, [[-r * 0.6, 0], [-r * 1.5, -r * 0.3], [-r * 1.3, 0], [-r * 1.5, r * 0.3]], shade(accent, -0.3));
+      ctx.beginPath(); ctx.ellipse(0, 0, r * 0.95, r * 0.45, 0, 0, Math.PI * 2);
+      ctx.fillStyle = accent; ctx.fill(); ctx.strokeStyle = team; ctx.lineWidth = 1.4; ctx.stroke();
+      circle(ctx, r * 0.95, 0, r * 0.32, shade(accent, 0.25));
+      circle(ctx, r * 1.1, -r * 0.1, r * 0.08, '#102040');
+      break;
+    }
+
     // ---------------------------------------------------------- buildings
+    case 'tower_sky': {
+      const s = r * 0.95;
+      poly(ctx, [[-s, -s], [s, -s], [s, s], [-s, s]], '#4a5568', '#1a2030', 2);
+      circle(ctx, 0, 0, s * 0.62, '#6a7a90');
+      ctx.save();
+      ctx.rotate(face);
+      ctx.strokeStyle = '#c8a46a'; ctx.lineWidth = s * 0.14;
+      ctx.beginPath(); ctx.arc(-s * 0.1, 0, s * 0.7, -1.0, 1.0); ctx.stroke();
+      ctx.strokeStyle = '#e8eef8'; ctx.lineWidth = s * 0.1;
+      ctx.beginPath(); ctx.moveTo(-s * 0.4, 0); ctx.lineTo(s * 1.05, 0); ctx.stroke();
+      poly(ctx, [[s * 1.2, 0], [s * 0.95, -s * 0.12], [s * 0.95, s * 0.12]], accent);
+      ctx.restore();
+      circle(ctx, 0, 0, s * 0.16, team);
+      tierPips(ctx, s, opt.tier);
+      break;
+    }
+    case 'drill': {
+      const s = r * 0.95;
+      poly(ctx, [[-s, -s], [s, -s], [s, s], [-s, s]], '#6a5232', '#2a1a08', 2);
+      ctx.save();
+      ctx.rotate(t * 3);
+      for (let i = 0; i < 8; i++) {
+        const an = (i / 8) * Math.PI * 2;
+        poly(ctx, [[Math.cos(an - 0.15) * s * 0.5, Math.sin(an - 0.15) * s * 0.5], [Math.cos(an) * s * 0.8, Math.sin(an) * s * 0.8], [Math.cos(an + 0.15) * s * 0.5, Math.sin(an + 0.15) * s * 0.5]], '#9aa0a8');
+      }
+      circle(ctx, 0, 0, s * 0.5, '#7a8088', '#3a3a40', 1.5);
+      ctx.restore();
+      circle(ctx, 0, 0, s * 0.22, '#ffd54a', team, 2);
+      for (const [x, y] of [[-s * 0.7, s * 0.7], [s * 0.7, -s * 0.7], [s * 0.72, s * 0.65]]) circle(ctx, x, y, s * 0.1, '#ffd54a');
+      break;
+    }
     case 'tower_guard': {
       const s = r * 1.05;
       poly(ctx, [[-s, -s], [s, -s], [s, s], [-s, s]], '#6c6a70', '#2a2830', 2);
@@ -332,7 +376,7 @@ export function drawModel(ctx, m, r, team, accent, face, t, opt = {}) {
   ctx.restore();
 }
 
-export const BUILDINGS = new Set(['tower_guard', 'core', 'shop', 'wall', 'tower_arrow', 'tower_frost', 'tower_cannon', 'tower_storm', 'beacon']);
+export const BUILDINGS = new Set(['tower_guard', 'core', 'shop', 'wall', 'tower_arrow', 'tower_frost', 'tower_cannon', 'tower_storm', 'beacon', 'tower_sky', 'drill']);
 
 function tierPips(ctx, s, tier) {
   if (!tier || tier < 2) return;
