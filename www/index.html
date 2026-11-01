@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0e0c14">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="description" content="Riftforge Arcade — custom RTS arcade maps (tower defense, hero arenas, survival) with online multiplayer, built for phones.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/app.css">
+  <title>Riftforge Arcade</title>
+</head>
+<body>
+  <main id="screen" class="screen"></main>
+
+  <section id="game" class="hidden" aria-label="Game">
+    <canvas id="view"></canvas>
+    <div class="hud-top">
+      <div class="res"><span class="goldbox">🪙 <b id="h-gold">0</b></span><span id="h-vars"></span></div>
+      <div id="h-timer"></div>
+      <div class="top-right"><span id="h-net"></span><button id="h-chat" class="hidden" title="Chat">💬</button><button id="h-menu" title="Menu">☰</button></div>
+    </div>
+    <div id="h-tools"></div>
+    <div id="h-msgs"></div>
+    <div id="h-hint"></div>
+    <div id="h-banner"></div>
+    <div class="hud-bottom">
+      <canvas id="minimap"></canvas>
+      <div id="h-sel"></div>
+      <div id="h-cmd"></div>
+    </div>
+    <div id="h-overlay"></div>
+  </section>
+
+  <noscript>Riftforge Arcade needs JavaScript.</noscript>
+  <script type="module" src="js/client/app.js"></script>
+</body>
+</html>

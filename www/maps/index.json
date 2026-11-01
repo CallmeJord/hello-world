@@ -1,0 +1,38 @@
+[
+  {
+    "file": "glacier-gate.json",
+    "name": "Glacier Gate",
+    "id": "glacier-gate",
+    "author": "Riftforge",
+    "genre": "Tower Defense",
+    "description": "Co-op maze TD. Build towers anywhere on the snowfield to shape the invaders' route. Don't fully block the path! 24 waves; survive them all.",
+    "size": "44×30",
+    "slots": 4,
+    "teams": 1,
+    "hash": "c6479fc4"
+  },
+  {
+    "file": "ember-rift.json",
+    "name": "Ember Rift",
+    "id": "ember-rift",
+    "author": "Riftforge",
+    "genre": "Hero Arena",
+    "description": "Three lanes, two teams, one Rift Core each. Pick a hero, push with your minions (siege rams join every third wave), farm jungle camps, buy items and destroy the enemy core. Up to 3v3 — bots fill empty slots.",
+    "size": "72×44",
+    "slots": 6,
+    "teams": 2,
+    "hash": "0df5f810"
+  },
+  {
+    "file": "last-light.json",
+    "name": "Last Light",
+    "id": "last-light",
+    "author": "Riftforge",
+    "genre": "Hero Survival",
+    "description": "Co-op survival for 1-4 heroes. Shades pour in from every corner to snuff out the Sun Beacon. Hold for 15 waves and defeat the Abyss Tyrant.",
+    "size": "48×48",
+    "slots": 4,
+    "teams": 1,
+    "hash": "e69c21d0"
+  }
+]

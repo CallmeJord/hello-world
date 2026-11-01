@@ -1,0 +1,25 @@
+{
+  "name": "riftforge-arcade",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Original mobile-first engine for custom RTS arcade maps (tower defense, hero arenas, survival) with online lockstep multiplayer.",
+  "type": "module",
+  "scripts": {
+    "start": "node server/server.js",
+    "build:maps": "node tools/build-maps.mjs",
+    "test": "node --test tests/*.test.js",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0"
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Riftforge Arcade</string>
+    <string name="title_activity_main">Riftforge Arcade</string>
+    <string name="package_name">com.riftforge.arcade</string>
+    <string name="custom_url_scheme">com.riftforge.arcade</string>
+</resources>

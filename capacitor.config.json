@@ -1,0 +1,13 @@
+{
+  "appId": "com.riftforge.arcade",
+  "appName": "Riftforge Arcade",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#0e0c14"
+  }
+}

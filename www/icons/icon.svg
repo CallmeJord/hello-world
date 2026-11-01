@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="35%" r="75%">
+      <stop offset="0" stop-color="#3a2a5c"/>
+      <stop offset="1" stop-color="#0e0c14"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff3c4"/>
+      <stop offset="0.55" stop-color="#e3b955"/>
+      <stop offset="1" stop-color="#9a6a1a"/>
+    </linearGradient>
+    <radialGradient id="rift" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.35" stop-color="#b98bff"/>
+      <stop offset="1" stop-color="#3a1a7a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <circle cx="256" cy="250" r="150" fill="url(#rift)"/>
+  <path d="M256 70 L300 200 L256 180 L212 200 Z" fill="url(#gold)"/>
+  <path d="M256 442 L300 312 L256 332 L212 312 Z" fill="url(#gold)"/>
+  <path d="M120 250 L230 210 L216 250 L230 290 Z" fill="url(#gold)"/>
+  <path d="M392 250 L282 210 L296 250 L282 290 Z" fill="url(#gold)"/>
+  <circle cx="256" cy="250" r="34" fill="#fff8e6" stroke="#e3b955" stroke-width="8"/>
+</svg>
